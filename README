@@ -1,0 +1,24 @@
+geomapip: 
+
+	This is an app written using the kivy UI framework: http://kivy.org
+
+	It simply looks for IP address from stdin and maps them on a Merc projected globe image from nasa.
+
+	Send it a log like this: 
+
+	cat MyLogWithIPAddresses | ./main.py
+
+	and it'll instantiate a kivy window showing IPs targeting you like in this video: 
+	http://www.youtube.com/watch?v=nR5HzCchuGM
+
+
+	Dependencies: 
+	Kivy
+	pygeoip (pip install pgeoip)
+	A geoip database: http://dev.maxmind.com/geoip/geolite  (GeoLiteCity Binary)
+
+	Notes: 
+	It assumes you live in Portland Oregon. If you don't, change this: 
+	homeLatitude= 45.5886
+	homeLongitude=-122.7064
+

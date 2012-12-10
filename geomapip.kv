@@ -1,0 +1,20 @@
+#:kivy 1.0
+#:import kivy kivy
+#:import win kivy.core.window
+
+<ipdot>:
+    canvas:
+        Rectangle:
+            source: 'ipdot.png'
+            size:   self.size
+            pos:    self.pos
+
+<geoMapIP>:
+    RelativeLayout:
+        canvas:
+            Rectangle:
+                source: 'land_ocean_ice_2048.jpg'
+                size: self.size
+                pos: self.pos
+
+
