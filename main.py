@@ -51,9 +51,10 @@ class stdinRead(Thread):
         while not self.quit:
             data = sys.stdin.readline()
             if data is None:
-                #sleep(2)
+                sleep(1)
                 continue
             q.appendleft(data)
+            sleep(.01)
 
     def pop(self):
         return self.queue.pop()
@@ -68,6 +69,7 @@ class geoMapIP(RelativeLayout):
         data=''        
         try:
             data = self.stdin.pop()
+            
         except Exception as e:
             print(e)
             return
