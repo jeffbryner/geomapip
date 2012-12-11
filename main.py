@@ -51,22 +51,19 @@ class stdinRead(Thread):
         while not self.quit:
             data = sys.stdin.readline()
             if data is None:
-                sleep(2)
+                #sleep(2)
                 continue
             q.appendleft(data)
 
     def pop(self):
         return self.queue.pop()
 
-class ipdot(Widget):
-    def on_complete(self):
-        self.size=(50,50)
+class ipdot(Widget):        
+    def on_complete(self,*args):
+        self.parent.remove_widget(self)
 
     
-class geoMapIP(RelativeLayout):              
-    def on_touch_down(self, touch):
-        print touch
-            
+class geoMapIP(RelativeLayout):                        
     def layoutCallback(self,dt):
         data=''        
         try:
@@ -78,35 +75,14 @@ class geoMapIP(RelativeLayout):
             geoDict=gi.record_by_addr(ip)
             if not geoDict==None:
                 x=lonToX(geoDict['longitude'])
-                y=latToY(geoDict['latitude'])
-                with self.canvas:
-                    anip=ipdot()
-                    anip.size=(15,15)
-                    anip.x=x-15
-                    anip.y=y-15
-                    anim = Animation(x=self.homeX, y=self.homeY,duration=3, t='out_back')
-                    anim.start(anip)
-                    anim.on_complete(ipdot)
-                    
-
-
-
+                y=latToY(geoDict['latitude'])                
+                anip = ipdot(size_hint=(None, None), size=(15, 15),pos=(x - 15, y - 15)) 
+                self.add_widget(anip)
+                anim = Animation(x=self.homeX, y=self.homeY,duration=3, t='out_back')                
+                anim.bind(on_complete=anip.on_complete)
+                anim.start(anip)
         
-class geoMapIPApp(App):
-
-    def app_callback(self,dt):
-        try:
-            data = self.stdin.pop()
-        except:
-            return
-        for ip in ipre.findall(data):
-            geoDict=gi.record_by_addr(ip)
-            if not geoDict==None:
-                x=lonToX(geoDict['longitude'])
-                y=latToY(geoDict['latitude'])
-                with self.root.canvas:
-                    Color(1,0,0)
-                    Ellipse(pos=(x,y),size=(10,10))                
+class geoMapIPApp(App):           
 
     def build(self):
         root = self.root        
@@ -115,11 +91,10 @@ class geoMapIPApp(App):
         kvLayout.stdin.start()
         kvLayout.homeX=lonToX(homeLongitude)
         kvLayout.homeY=latToY(homeLatitude)
-        
         Clock.schedule_interval(kvLayout.layoutCallback,1)        
         return kvLayout
 
-Factory.register("ipdot", ipdot)
+#Factory.register("ipdot", ipdot)
 if __name__ == '__main__':
     geoMapIPApp().run()
     
