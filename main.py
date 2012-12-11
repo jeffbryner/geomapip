@@ -68,8 +68,8 @@ class geoMapIP(RelativeLayout):
     def layoutCallback(self,dt):
         data=''        
         try:
-            data = self.stdin.pop()
-            
+            if len(self.stdin.queue)>0:
+                data = self.stdin.pop()            
         except Exception as e:
             print(e)
             return
