@@ -7,7 +7,8 @@ from kivy.animation import Animation
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.clock import Clock
 from kivy.uix.widget import Widget
-from kivy.properties import NumericProperty, ReferenceListProperty
+from kivy.uix.label import Label
+from kivy.properties import ObjectProperty, NumericProperty, ReferenceListProperty
 from kivy.vector import Vector
 from kivy.factory import Factory
 from random import randint
@@ -30,6 +31,8 @@ ipre=re.compile('(?:\d{1,3}\.){3}\d{1,3}')
 gi = pygeoip.GeoIP('/usr/share/GeoIP/GeoLiteCity.dat', pygeoip.MEMORY_CACHE)
 homeLatitude= 45.5886
 homeLongitude=-122.7064
+#max ipdots to flood the screen with at once.
+MAX_IPS=20
 
 def latToY(targetLat):
     return ((targetLat - minLat) / (maxLat - minLat)) * (MAP_HEIGHT - 1)
@@ -49,8 +52,8 @@ class stdinRead(Thread):
     def run(self):
         q = self.queue
         while not self.quit:
-            data = sys.stdin.readline()
-            if data is None:
+            data = sys.stdin.readline().strip()
+            if data is None or len(data)==0:
                 sleep(1)
                 continue
             q.appendleft(data)
@@ -63,26 +66,34 @@ class ipdot(Widget):
     def on_complete(self,*args):
         self.parent.remove_widget(self)
 
-    
-class geoMapIP(RelativeLayout):                        
+class geoMapIP(RelativeLayout):       
+    def __init__(self, *largs, **kwargs):
+        super(geoMapIP, self).__init__(*largs, **kwargs)     
+        y=-550
+        x=-720
+        self.l=Label(text="[color=ff3333]q:[/color]",pos=(x,y),markup=True)
+        self.add_widget(self.l)
+        
     def layoutCallback(self,dt):
         data=''        
         try:
-            if len(self.stdin.queue)>0:
+            self.l.text="[b][color=ff3333]q:%d[/color][/b]"%len(self.stdin.queue)
+            #extract at most 5 lines from the queue to map/show/animate
+            for x in range(0,min(MAX_IPS,len(self.stdin.queue))):
                 data = self.stdin.pop()            
+                for ip in ipre.findall(data):
+                    geoDict=gi.record_by_addr(ip)
+                    if not geoDict==None:
+                        x=lonToX(geoDict['longitude'])
+                        y=latToY(geoDict['latitude'])                
+                        anip = ipdot(size_hint=(None, None), size=(15, 15),pos=(x - 15, y - 15)) 
+                        self.add_widget(anip)
+                        anim = Animation(x=self.homeX, y=self.homeY,duration=randint(1,5), t='out_back')
+                        anim.bind(on_complete=anip.on_complete)
+                        anim.start(anip)
         except Exception as e:
             print(e)
             return
-        for ip in ipre.findall(data):
-            geoDict=gi.record_by_addr(ip)
-            if not geoDict==None:
-                x=lonToX(geoDict['longitude'])
-                y=latToY(geoDict['latitude'])                
-                anip = ipdot(size_hint=(None, None), size=(15, 15),pos=(x - 15, y - 15)) 
-                self.add_widget(anip)
-                anim = Animation(x=self.homeX, y=self.homeY,duration=3, t='out_back')                
-                anim.bind(on_complete=anip.on_complete)
-                anim.start(anip)
         
 class geoMapIPApp(App):           
 
@@ -96,7 +107,6 @@ class geoMapIPApp(App):
         Clock.schedule_interval(kvLayout.layoutCallback,1)        
         return kvLayout
 
-#Factory.register("ipdot", ipdot)
 if __name__ == '__main__':
     geoMapIPApp().run()
     
