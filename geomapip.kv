@@ -14,7 +14,13 @@
         canvas:
             Rectangle:
                 source: 'land_ocean_ice_2048.jpg'
-                size: (1680,1024)
+                size: (2048,1024)
                 pos: self.pos
 
-
+    Label:
+        text: str("[b][color=ff3333]" + root.status + "[/color][/b]")
+        markup: True
+        size_hint: (.14, .05)
+        font_size: root.size[0]*.02
+        text_size: self.size
+        pos: (root.width * .001, root.height * .004)

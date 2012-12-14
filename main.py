@@ -1,24 +1,18 @@
 #!/usr/bin/python2
 import sys
-import os
 import re
 from kivy.app import App
 from kivy.animation import Animation
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.clock import Clock
 from kivy.uix.widget import Widget
-from kivy.uix.label import Label
-from kivy.properties import ObjectProperty, NumericProperty, ReferenceListProperty
-from kivy.vector import Vector
-from kivy.factory import Factory
-from random import randint
-from kivy.graphics import Color, Ellipse, Rectangle
+from random import randint, choice
 from kivy.core.window import Window
-from StringIO import StringIO
 import pygeoip
 from time import sleep
 from threading import Thread
 from collections import deque
+from kivy.properties import StringProperty
 
 #constants
 minLat=-90
@@ -26,7 +20,7 @@ maxLat=90
 minLon=-180
 maxLon=180
 MAP_HEIGHT=1024
-MAP_WIDTH=1680
+MAP_WIDTH=2048
 ipre=re.compile('(?:\d{1,3}\.){3}\d{1,3}')
 gi = pygeoip.GeoIP('/usr/share/GeoIP/GeoLiteCity.dat', pygeoip.MEMORY_CACHE)
 homeLatitude= 45.5886
@@ -66,19 +60,14 @@ class ipdot(Widget):
     def on_complete(self,*args):
         self.parent.remove_widget(self)
 
-class geoMapIP(RelativeLayout):       
-    def __init__(self, *largs, **kwargs):
-        super(geoMapIP, self).__init__(*largs, **kwargs)     
-        y=-550
-        x=-720
-        self.l=Label(text="[color=ff3333]q:[/color]",pos=(x,y),markup=True)
-        self.add_widget(self.l)
-        
+    
+class geoMapIP(RelativeLayout):                        
+    status=StringProperty('queue: 0')
     def layoutCallback(self,dt):
         data=''        
         try:
-            self.l.text="[b][color=ff3333]q:%d[/color][/b]"%len(self.stdin.queue)
-            #extract at most 5 lines from the queue to map/show/animate
+            self.status="queue:%d"%len(self.stdin.queue)
+            #extract at most X lines from the queue to map/show/animate
             for x in range(0,min(MAX_IPS,len(self.stdin.queue))):
                 data = self.stdin.pop()            
                 for ip in ipre.findall(data):
@@ -88,7 +77,8 @@ class geoMapIP(RelativeLayout):
                         y=latToY(geoDict['latitude'])                
                         anip = ipdot(size_hint=(None, None), size=(15, 15),pos=(x - 15, y - 15)) 
                         self.add_widget(anip)
-                        anim = Animation(x=self.homeX, y=self.homeY,duration=randint(1,5), t='out_back')
+                        transition=choice(['out_cubic','in_out_quart','in_out_quint','in_out_back'])
+                        anim = Animation(x=self.homeX, y=self.homeY,duration=randint(1,5), t=transition)
                         anim.bind(on_complete=anip.on_complete)
                         anim.start(anip)
         except Exception as e:
