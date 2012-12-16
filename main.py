@@ -7,12 +7,13 @@ from kivy.uix.relativelayout import RelativeLayout
 from kivy.clock import Clock
 from kivy.uix.widget import Widget
 from random import randint, choice
-from kivy.core.window import Window
 import pygeoip
 from time import sleep
 from threading import Thread
 from collections import deque
 from kivy.properties import StringProperty
+from kivy.config import Config
+
 
 #constants
 minLat=-90
@@ -86,14 +87,20 @@ class geoMapIP(RelativeLayout):
             return
         
 class geoMapIPApp(App):           
-
+    def build_config(self, config):
+        print('Configuring************')
+        Config.set('graphics','width',MAP_WIDTH)
+        Config.set('graphics','height',MAP_HEIGHT)
+        Config.set('kivy','log_level','critical')
+        Config.set('kivy','log_enable','0')        
+        
+        
     def build(self):
-        root = self.root        
-        kvLayout=geoMapIP()
+        kvLayout=geoMapIP()        
         kvLayout.stdin=stdinRead()
         kvLayout.stdin.start()
         kvLayout.homeX=lonToX(homeLongitude)
-        kvLayout.homeY=latToY(homeLatitude)
+        kvLayout.homeY=latToY(homeLatitude)        
         Clock.schedule_interval(kvLayout.layoutCallback,1)        
         return kvLayout
 
