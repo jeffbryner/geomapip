@@ -88,7 +88,6 @@ class geoMapIP(RelativeLayout):
         
 class geoMapIPApp(App):           
     def build_config(self, config):
-        print('Configuring************')
         Config.set('graphics','width',MAP_WIDTH)
         Config.set('graphics','height',MAP_HEIGHT)
         Config.set('kivy','log_level','critical')
