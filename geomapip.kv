@@ -1,13 +1,66 @@
 #:kivy 1.0
 #:import kivy kivy
 #:import win kivy.core.window
-
+        
 <ipdot>:
     canvas:
         Rectangle:
             source: 'ipdot.png'
             size:   self.size
             pos:    self.pos
+
+<ipdotDetailed>:
+    BoxLayout: 
+        orientation: 'vertical'
+        BoxLayout: 
+            orientation: 'horizontal'
+            size: 100,15
+            size_hint: None,None
+            canvas:
+                Color:
+                    rgba: .1, .1, .1, .25
+                Rectangle:
+                    size: self.size
+                    pos: self.pos		
+            Label:
+                text: str(root.ip)
+                color: (1,0,0,1)
+                bold: False
+                font_size: '12dp'
+
+        BoxLayout: 
+            orientation: 'horizontal'
+            size: 100,15
+            size_hint: None,None
+            canvas:
+                Color:
+                    rgba: .1, .1, .1, .25
+                Rectangle:
+                    size: self.size
+                    pos: self.pos		
+            Label:
+                text: str(root.location)
+                color: (1,0,0,1)
+                bold: False
+                font_size: '12dp'
+        BoxLayout: 
+            orientation: 'horizontal'
+            size: 15,15
+            size_hint: None,None
+            canvas:
+                Color:
+                    rgba: 248, 248, 255, 1
+                Rectangle:
+                    source: 'crosshairs.gif'
+                    size:   self.size
+                    pos:    root.pos[0]+self.size[0]*3,self.pos[1]
+            Image: 
+                source: 'ipdot.png'
+                pos:    root.pos[0]+self.size[0]*3,self.pos[1]
+                
+
+
+
 
 <geoMapIP>:
     RelativeLayout:
@@ -16,11 +69,36 @@
                 source: 'land_ocean_ice_2048.jpg'
                 size: (2048,1024)
                 pos: self.pos
+    AnchorLayout:
+        anchor_x: 'left'
+        anchor_y: 'bottom'
+        Label:
+            text: str("[b][color=ff3333]" + root.status + "[/color][/b]")
+            #text: str("[b][color=ff3333]" + str(self.size[0]) + "[/color][/b]")
+            markup: True
+            size_hint: (.14, .05)
+            font_size: root.size[0]*.02
+            text_size: self.size
 
-    Label:
-        text: str("[b][color=ff3333]" + root.status + "[/color][/b]")
-        markup: True
-        size_hint: (.14, .05)
-        font_size: root.size[0]*.02
-        text_size: self.size
-        pos: (root.width * .001, root.height * .004)
+
+    AnchorLayout:
+        anchor_x: 'right'
+        anchor_y: 'bottom'        
+        BoxLayout:
+            orientation: 'vertical'
+            size: 100,60
+            size_hint: None,None
+            padding: '1dp'
+            spacing: '1dp'
+            Label:                
+                text: "Detail"
+                bold: True
+                color: (1,0,0,.61)
+                #x: root.width/self.size[0]/2
+                #y: (self.size[1])
+                #pos: (root.width * .001, root.height * .004)
+                #pos: (root.width * .001, root.height * .004)
+            Switch:
+                on_touch_down: root.detail_switch()
+                
+            
